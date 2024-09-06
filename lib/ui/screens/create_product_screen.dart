@@ -29,7 +29,13 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
     try {
       await productoCreationRepository.crearProducto(producto);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Producto creado con éxito')),
+        SnackBar(
+          content: Text(
+            'Producto creado con éxito',
+            textAlign: TextAlign.center,
+          ),
+          backgroundColor: Colors.green, // Aquí estableces el color de fondo
+        ),
       );
       Navigator.pop(context); // Regresar a la pantalla anterior
     } catch (e) {
