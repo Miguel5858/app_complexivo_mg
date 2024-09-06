@@ -58,3 +58,29 @@ Future<List<Producto>> obtenerProductos() async {
     rethrow;
   }
 }
+
+Future<void> eliminarProducto(int productoId) async {
+  // Construye el cuerpo de la solicitud con el ID del producto
+  final Map<String, dynamic> requestBody = {
+    "resources": [productoId]
+  };
+
+  try {
+    // Envía la solicitud DELETE con el cuerpo
+    final response = await http.delete(
+      Uri.parse('http://192.168.3.16:8000/api/products/'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(requestBody),
+    );
+
+    if (response.statusCode == 200) {
+      print('Producto eliminado con éxito');
+    } else {
+      print('Respuesta del servidor: ${response.body}');
+      throw Exception('Error al eliminar el producto: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Excepción: $e');
+    rethrow;
+  }
+}

@@ -1,46 +1,55 @@
 import 'package:flutter/material.dart';
 import '../../data/models/producto.dart';
-import '../../data/repositories/producto_creation_repository.dart';
+import '../../data/repositories/producto_update_repository.dart';
 
-class CreateProductScreen extends StatefulWidget {
+class EditProductScreen extends StatefulWidget {
+  final Producto producto;
+
+  EditProductScreen({required this.producto});
+
   @override
-  _CreateProductScreenState createState() => _CreateProductScreenState();
+  _EditProductScreenState createState() => _EditProductScreenState();
 }
 
-class _CreateProductScreenState extends State<CreateProductScreen> {
+class _EditProductScreenState extends State<EditProductScreen> {
   final _descriptionController = TextEditingController();
   final _stockController = TextEditingController();
   final _priceController = TextEditingController();
 
-  final productoCreationRepository = ProductoCreationRepository();
+  final productoUpdateRepository = ProductoUpdateRepository();
 
-  void _crearProducto() async {
-    final description = _descriptionController.text;
-    final stock = int.tryParse(_stockController.text) ?? 0;
-    final price = _priceController.text;
+  @override
+  void initState() {
+    super.initState();
+    _descriptionController.text = widget.producto.description;
+    _stockController.text = widget.producto.stock.toString();
+    _priceController.text = widget.producto.price;
+  }
 
-    final producto = Producto(
-      id: 0, // El ID será generado por el servidor
-      description: description,
-      stock: stock,
-      price: price,
+  void _updateProduct() async {
+    final updatedProducto = Producto(
+      id: widget.producto.id,
+      description: _descriptionController.text,
+      stock: int.tryParse(_stockController.text) ?? 0,
+      price: _priceController.text,
     );
 
     try {
-      await productoCreationRepository.crearProducto(producto);
+      await productoUpdateRepository.actualizarProducto(updatedProducto);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Producto creado con éxito',
+            'Producto actualizado con éxito',
             textAlign: TextAlign.center,
           ),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context);
+      // Retorna el producto actualizado al cerrar la pantalla
+      Navigator.pop(context, updatedProducto);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al crear producto')),
+        SnackBar(content: Text('Error al actualizar producto')),
       );
       print(e);
     }
@@ -50,9 +59,9 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Crear Nuevo Producto',
+        title: Text('Editar Producto',
             style: TextStyle(color: Colors.blueGrey[100])),
-        backgroundColor: Colors.blueGrey, // Color juvenil para la AppBar
+        backgroundColor: Colors.blueGrey, // Estilo juvenil para la AppBar
       ),
       body: Center(
         child: Padding(
@@ -60,7 +69,7 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
           child: SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: 600, // Limita el ancho del contenido
+                maxWidth: 600, // Limitar ancho del contenido
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -94,8 +103,8 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
                   ),
                   SizedBox(height: 24.0),
                   ElevatedButton(
-                    onPressed: _crearProducto,
-                    child: Text('Guardar Producto'),
+                    onPressed: _updateProduct,
+                    child: Text('Guardar Cambios'),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.blueGrey[50],
                       backgroundColor: Colors.blueGrey,
@@ -106,7 +115,6 @@ class _CreateProductScreenState extends State<CreateProductScreen> {
                       textStyle: TextStyle(
                         fontSize: 16,
                       ),
-
                       elevation: 5, // Sombra sutil
                     ),
                   ),
