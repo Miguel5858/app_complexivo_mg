@@ -1,3 +1,4 @@
+import 'package:app_complexivo_mg/ui/screens/create_product_screen.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/producto.dart';
 import '../../data/repositories/producto_repository.dart';
@@ -16,6 +17,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
     futureProductos = obtenerProductos();
   }
 
+  Future<void> _refreshProductos() async {
+    setState(() {
+      futureProductos = obtenerProductos();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,15 +34,18 @@ class _ProductListScreenState extends State<ProductListScreen> {
           future: futureProductos,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  var producto = snapshot.data![index];
-                  return ListTile(
-                    title: Text(producto.description),
-                    subtitle: Text('Precio: ${producto.price}'),
-                  );
-                },
+              return RefreshIndicator(
+                onRefresh: _refreshProductos,
+                child: ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    var producto = snapshot.data![index];
+                    return ListTile(
+                      title: Text(producto.description),
+                      subtitle: Text('Precio: ${producto.price}'),
+                    );
+                  },
+                ),
               );
             } else if (snapshot.hasError) {
               return Text("${snapshot.error}");
@@ -43,6 +53,19 @@ class _ProductListScreenState extends State<ProductListScreen> {
             return CircularProgressIndicator();
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          // Navegar a la pantalla de creación de productos y esperar a que vuelva
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CreateProductScreen()),
+          );
+          // Después de regresar, actualizar la lista de productos
+          _refreshProductos();
+        },
+        child: Icon(Icons.add),
+        tooltip: 'Nuevo Producto',
       ),
     );
   }
