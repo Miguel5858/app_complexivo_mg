@@ -1,7 +1,8 @@
-import 'package:app_complexivo_mg/ui/screens/create_product_screen.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/producto.dart';
 import '../../data/repositories/producto_repository.dart';
+import 'create_product_screen.dart';
+import 'details_product_screen.dart'; // Asegúrate de que el import sea correcto
 
 class ProductListScreen extends StatefulWidget {
   @override
@@ -9,18 +10,27 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
-  late Future<List<Producto>> futureProductos;
+  List<Producto> _allProducts = [];
 
   @override
   void initState() {
     super.initState();
-    futureProductos = obtenerProductos();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    try {
+      final products = await obtenerProductos();
+      setState(() {
+        _allProducts = products;
+      });
+    } catch (e) {
+      print('Error loading products: $e');
+    }
   }
 
   Future<void> _refreshProductos() async {
-    setState(() {
-      futureProductos = obtenerProductos();
-    });
+    await _loadProducts();
   }
 
   @override
@@ -30,38 +40,52 @@ class _ProductListScreenState extends State<ProductListScreen> {
         title: Text('Lista de Productos'),
       ),
       body: Center(
-        child: FutureBuilder<List<Producto>>(
-          future: futureProductos,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return RefreshIndicator(
-                onRefresh: _refreshProductos,
-                child: ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (context, index) {
-                    var producto = snapshot.data![index];
-                    return ListTile(
-                      title: Text(producto.description),
-                      subtitle: Text('Precio: ${producto.price}'),
+        child: RefreshIndicator(
+          onRefresh: _refreshProductos,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Column(
+              children: [
+                DataTable(
+                  columns: const [
+                    DataColumn(
+                        label: Text('ID')), // Cambiar de Descripción a ID
+                    DataColumn(label: Text('Descripción')),
+                    DataColumn(label: Text('Stock')),
+                  ],
+                  rows: _allProducts.map((producto) {
+                    return DataRow(
+                      cells: [
+                        DataCell(Text(producto.id.toString())), // Mostrar el ID
+                        DataCell(Text(producto.description)),
+                        DataCell(Text(producto.stock.toString())),
+                      ],
+                      onSelectChanged: (selected) {
+                        if (selected != null && selected) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailsProductoScreen(
+                                producto: producto,
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     );
-                  },
+                  }).toList(),
                 ),
-              );
-            } else if (snapshot.hasError) {
-              return Text("${snapshot.error}");
-            }
-            return CircularProgressIndicator();
-          },
+              ],
+            ),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // Navegar a la pantalla de creación de productos y esperar a que vuelva
           await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => CreateProductScreen()),
           );
-          // Después de regresar, actualizar la lista de productos
           _refreshProductos();
         },
         child: Icon(Icons.add),

@@ -20,8 +20,8 @@ Future<List<Producto>> obtenerProductos() async {
       "aggregates": [],
       "instructions": [],
       "gates": ["create", "update", "delete"],
-      "page": 1,
-      "limit": 10
+      "page": 1, // Siempre empieza desde la primera página
+      "limit": 10 // Usar un valor alto para obtener todos los productos
     }
   };
 
