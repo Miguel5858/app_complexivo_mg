@@ -27,7 +27,7 @@ Future<List<Producto>> obtenerProductos() async {
 
   try {
     final response = await http.post(
-      Uri.parse('http://192.168.3.16:8000/api/products/search'),
+      Uri.parse('http://192.168.3.90:8000/api/products/search'),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode(requestBody),
     );
@@ -68,7 +68,7 @@ Future<void> eliminarProducto(int productoId) async {
   try {
     // Envía la solicitud DELETE con el cuerpo
     final response = await http.delete(
-      Uri.parse('http://192.168.3.16:8000/api/products/'),
+      Uri.parse('http://192.168.3.90:8000/api/products/'),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode(requestBody),
     );

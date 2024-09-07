@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/producto.dart';
 
 class ProductoUpdateRepository {
-  final String url = 'http://192.168.3.16:8000/api/products/mutate';
+  final String url = 'http://192.168.3.90:8000/api/products/mutate';
 
   Future<void> actualizarProducto(Producto producto) async {
     final Map<String, dynamic> requestBody = {
